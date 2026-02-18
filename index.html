@@ -105,6 +105,76 @@ const failceza = {
     button_label: "Onaylıyorum"
 };
 
+const suc_magdur = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Daha önce suç mağduru oldunuz mu? Olduysanız suçun türü nedir:", name: "suc_magdur", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const suc_tanik = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Daha önce suça tanık oldunuz mu? Olduysanız suçun türü nedir:", name: "suc_tanik", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const etkileme = {
+    type: jsPsychSurveyMultiChoice,
+    questions: [{
+        prompt: "İzlediğiniz görüntülerin sizi ne kadar etkilediğini puanlayınız? 1- En az 7 - En çok şeklinde cevaplayınız:",
+        name: "etkileme",
+        options: ["1", "2", "3", "4", "5", "6", "7"],
+        required: true
+    }],
+    button_label: "Onaylıyorum"
+};
+
+const duygusallik = {
+    type: jsPsychSurveyMultiChoice,
+    questions: [{
+        prompt: "İzlediğiniz görüntünün ne kadar duygusallık içerdiğini puanlayınız. 1- En az 7 - En çok şeklinde cevaplayınız:",
+        name: "duygusallik",
+        options: ["1", "2", "3", "4", "5", "6", "7"],
+        required: true
+    }],
+    button_label: "Onaylıyorum"
+};
+
+const olay1 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Görüntülerde ne oldu?:", name: "olay1", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const olay2 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Olayı kim başlattı?:", name: "olay2", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const olay3 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Olaya müdahale eden kimse oldu mu?:", name: "olay3", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const olay4 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Olay nasıl sonlandı?:", name: "olay4", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const fail1 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Bu olayda sizce fail kim?:", name: "fail1", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const fail2 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Failin eşgalini verebilir misiniz? Failin fiziksel özelliklerini anlatır mısınız?:", name: "fail2", required: true }],
+    button_label: "Onaylıyorum"
+};
+
 const bitis = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
@@ -114,7 +184,16 @@ const bitis = {
     choices: ["Bitir"]
 };
 
-jsPsych.run([hosgeldin, video, okul_num, yas, cinsiyet, egitim, gercekcilik, failceza, bitis]);
+jsPsych.run([
+    hosgeldin, video,
+    okul_num, yas, cinsiyet, egitim,
+    gercekcilik, failceza,
+    suc_magdur, suc_tanik,
+    etkileme, duygusallik,
+    olay1, olay2, olay3, olay4,
+    fail1, fail2,
+    bitis
+]);
 
 </script>
 </body>
