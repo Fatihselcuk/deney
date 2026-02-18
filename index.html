@@ -77,7 +77,29 @@ const egitim = {
     questions: [{
         prompt: "Eğitim durumunuz:",
         name: "egitim",
-        options: ["İlkokul", "Ortaokul", "Lise", "Üniversite", "Yüksek Lisans", "Doktora"],
+        options: ["Lise", "Üniversite", "Yüksek Lisans", "Doktora"],
+        required: true
+    }],
+    button_label: "Onaylıyorum"
+};
+
+const gercekcilik = {
+    type: jsPsychSurveyMultiChoice,
+    questions: [{
+        prompt: "İzlediğiniz görüntüleri ne kadar gerçekçi buldunuz?",
+        name: "gercekcilik",
+        options: ["1", "2", "3", "4", "5"],
+        required: true
+    }],
+    button_label: "Onaylıyorum"
+};
+
+const failceza = {
+    type: jsPsychSurveyMultiChoice,
+    questions: [{
+        prompt: "Faile sizce ne kadar ceza verilmeli?",
+        name: "failceza",
+        options: ["1 yıldan az", "1-5 yıl arası", "5 yıldan fazla"],
         required: true
     }],
     button_label: "Onaylıyorum"
@@ -92,7 +114,7 @@ const bitis = {
     choices: ["Bitir"]
 };
 
-jsPsych.run([hosgeldin, video, okul_num, yas, cinsiyet, egitim, bitis]);
+jsPsych.run([hosgeldin, video, okul_num, yas, cinsiyet, egitim, gercekcilik, failceza, bitis]);
 
 </script>
 </body>
