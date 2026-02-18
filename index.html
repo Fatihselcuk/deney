@@ -21,7 +21,45 @@
 
 const jsPsych = initJsPsych({
     on_finish: function() {
-        jsPsych.data.get().localSave('csv', 'deney_verisi.csv');
+        const sutunlar = [
+            "video_gosterilen","okul_num","email","yas","cinsiyet","egitim",
+            "gercekcilik","failceza","suc_magdur","suc_tanik","etkileme","duygusallik",
+            "olay1","olay2","olay3","olay4",
+            "fail1","fail2","fail3","fail4",
+            "magdur1","magdur2","magdur3","magdur4",
+            "cevresel1","cevresel2","cevresel3","cevresel4"
+        ];
+
+        const veri = {};
+        const tumVeri = jsPsych.data.get().values();
+
+        // video
+        const videoTrial = tumVeri.find(t => t.video_gosterilen);
+        veri["video_gosterilen"] = videoTrial ? videoTrial.video_gosterilen : "";
+
+        // survey-text yanıtları
+        tumVeri.forEach(t => {
+            if (t.response) {
+                Object.keys(t.response).forEach(key => {
+                    veri[key] = t.response[key];
+                });
+            }
+        });
+
+        // CSV oluştur
+        const baslik = sutunlar.join(",");
+        const satir = sutunlar.map(s => {
+            const deger = veri[s] !== undefined ? String(veri[s]) : "";
+            return '"' + deger.replace(/"/g, '""') + '"';
+        }).join(",");
+
+        const csvIcerik = "\uFEFF" + baslik + "\n" + satir;
+        const blob = new Blob([csvIcerik], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "deney_verisi.csv";
+        a.click();
     }
 });
 
@@ -51,20 +89,26 @@ const video = {
 
 const okul_num = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Okul numaranızı giriniz", name: "okul_num", required: true }],
+    questions: [{ prompt: "Okul numaranızı giriniz:", name: "okul_num", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const email = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "E-posta adresinizi giriniz:", name: "email", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const yas = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Yaşınızı giriniz", name: "yas", required: true }],
+    questions: [{ prompt: "Yaşınızı giriniz:", name: "yas", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const cinsiyet = {
     type: jsPsychSurveyMultiChoice,
     questions: [{
-        prompt: "Cinsiyetiniz",
+        prompt: "Cinsiyetiniz:",
         name: "cinsiyet",
         options: ["Kadın", "Erkek", "Belirtmek İstemiyorum"],
         required: true
@@ -75,7 +119,7 @@ const cinsiyet = {
 const egitim = {
     type: jsPsychSurveyMultiChoice,
     questions: [{
-        prompt: "Eğitim durumunuz",
+        prompt: "Eğitim durumunuz:",
         name: "egitim",
         options: ["Lise", "Üniversite", "Yüksek Lisans", "Doktora"],
         required: true
@@ -107,20 +151,20 @@ const failceza = {
 
 const suc_magdur = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Daha önce suç mağduru oldunuz mu? Olduysanız suçun türü nedir?. Eğer olmadıysanız boşluğa yok yazınız.", name: "suc_magdur", required: true }],
+    questions: [{ prompt: "Daha önce suç mağduru oldunuz mu? Olduysanız suçun türü nedir:", name: "suc_magdur", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const suc_tanik = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Daha önce suça tanık oldunuz mu? Olduysanız suçun türü nedir?. Eğer olmadıysanız boşluğa yok yazınız.", name: "suc_tanik", required: true }],
+    questions: [{ prompt: "Daha önce suça tanık oldunuz mu? Olduysanız suçun türü nedir:", name: "suc_tanik", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const etkileme = {
     type: jsPsychSurveyMultiChoice,
     questions: [{
-        prompt: "İzlediğiniz görüntülerin sizi ne kadar etkilediğini puanlayınız? 1- En az 7 - En çok şeklinde cevaplayınız",
+        prompt: "İzlediğiniz görüntülerin sizi ne kadar etkilediğini puanlayınız? 1- En az 7 - En çok şeklinde cevaplayınız:",
         name: "etkileme",
         options: ["1", "2", "3", "4", "5", "6", "7"],
         required: true
@@ -131,7 +175,7 @@ const etkileme = {
 const duygusallik = {
     type: jsPsychSurveyMultiChoice,
     questions: [{
-        prompt: "İzlediğiniz görüntünün ne kadar duygusallık içerdiğini puanlayınız. 1- En az 7 - En çok şeklinde cevaplayınız",
+        prompt: "İzlediğiniz görüntünün ne kadar duygusallık içerdiğini puanlayınız. 1- En az 7 - En çok şeklinde cevaplayınız:",
         name: "duygusallik",
         options: ["1", "2", "3", "4", "5", "6", "7"],
         required: true
@@ -141,91 +185,91 @@ const duygusallik = {
 
 const olay1 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Görüntülerde ne oldu?", name: "olay1", required: true }],
+    questions: [{ prompt: "Görüntülerde ne oldu?:", name: "olay1", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const olay2 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Olayı kim başlattı?", name: "olay2", required: true }],
+    questions: [{ prompt: "Olayı kim başlattı?:", name: "olay2", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const olay3 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Olaya müdahale eden kimse oldu mu?", name: "olay3", required: true }],
+    questions: [{ prompt: "Olaya müdahale eden kimse oldu mu?:", name: "olay3", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const olay4 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Olay nasıl sonlandı?", name: "olay4", required: true }],
+    questions: [{ prompt: "Olay nasıl sonlandı?:", name: "olay4", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const fail1 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Bu olayda sizce fail kim?", name: "fail1", required: true }],
+    questions: [{ prompt: "Bu olayda sizce fail kim?:", name: "fail1", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const fail2 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Failin eşgalini verebilir misiniz? Failin fiziksel özelliklerini anlatır mısınız?", name: "fail2", required: true }],
+    questions: [{ prompt: "Failin eşgalini verebilir misiniz? Failin fiziksel özelliklerini anlatır mısınız?:", name: "fail2", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const fail3 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Failin teşhisini kolaylaştıracak belirgin bir özelliği var mıydı? Varsa neydi?", name: "fail3", required: true }],
+    questions: [{ prompt: "Failin teşhisini kolaylaştıracak belirgin bir özelliği var mıydı? Varsa neydi?:", name: "fail3", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const fail4 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Fail nasıl giyinmişti?", name: "fail4", required: true }],
+    questions: [{ prompt: "Fail nasıl giyinmişti?:", name: "fail4", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const magdur1 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Bu olayda sizce mağdur kimdir?", name: "magdur1", required: true }],
+    questions: [{ prompt: "Bu olayda sizce mağdur kimdir?:", name: "magdur1", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const magdur2 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Mağdurun fiziksel özelliklerini anlatır mısınız?", name: "magdur2", required: true }],
+    questions: [{ prompt: "Mağdurun fiziksel özelliklerini anlatır mısınız?:", name: "magdur2", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const magdur3 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Mağdurun teşhisini kolaylaştıracak belirgin bir özelliği var mıydı? Varsa neydi?", name: "magdur3", required: true }],
+    questions: [{ prompt: "Mağdurun teşhisini kolaylaştıracak belirgin bir özelliği var mıydı? Varsa neydi?:", name: "magdur3", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const magdur4 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Mağdur ne giyinmişti?", name: "magdur4", required: true }],
+    questions: [{ prompt: "Mağdur ne giyinmişti?:", name: "magdur4", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const cevresel1 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Olaya tanıklık eden başka kimler vardı? Bu kişilere ait özellikleri anlatır mısınız?", name: "cevresel1", required: true }],
+    questions: [{ prompt: "Olaya tanıklık eden başka kimler vardı? Bu kişilere ait özellikleri anlatır mısınız?:", name: "cevresel1", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const cevresel2 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Olay anında mekandaki diğer insanlar neler yapıyorlardı?", name: "cevresel2", required: true }],
+    questions: [{ prompt: "Olay anında mekandaki diğer insanlar neler yapıyorlardı?:", name: "cevresel2", required: true }],
     button_label: "Onaylıyorum"
 };
 
 const cevresel3 = {
     type: jsPsychSurveyText,
-    questions: [{ prompt: "Mekana ilişkin hatırladıklarınızı anlatır mısınız?", name: "cevresel3", required: true }],
+    questions: [{ prompt: "Mekana ilişkin hatırladıklarınızı anlatır mısınız?:", name: "cevresel3", required: true }],
     button_label: "Onaylıyorum"
 };
 
@@ -234,18 +278,12 @@ const cevresel4 = {
     questions: [{ prompt: "Masada neler vardı?:", name: "cevresel4", required: true }],
     button_label: "Onaylıyorum"
 };
-    
-const email = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "E-posta adresinizi giriniz:", name: "email", required: true }],
-    button_label: "Onaylıyorum"
-};
 
 const bitis = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
         <h2>Teşekkürler!</h2>
-        <p style="font-size:17px;">Katılımınız için teşekkür ederiz. Telefonunuza ya da bilgisayarınıza kaydedilen deney çıktı dosyasını eildirim@gmail.com adresine adınızı ve soyadınızı da yazarak göndermeniz rica olunur."</p>
+        <p style="font-size:17px;">Katılımınız için teşekkür ederiz. Verileriniz kaydedildi.</p>
     `,
     choices: ["Bitir"]
 };
