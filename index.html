@@ -175,6 +175,66 @@ const fail2 = {
     button_label: "Onaylıyorum"
 };
 
+const fail3 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Failin teşhisini kolaylaştıracak belirgin bir özelliği var mıydı? Varsa neydi?:", name: "fail3", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const fail4 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Fail nasıl giyinmişti?:", name: "fail4", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const magdur1 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Bu olayda sizce mağdur kimdir?:", name: "magdur1", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const magdur2 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Mağdurun fiziksel özelliklerini anlatır mısınız?:", name: "magdur2", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const magdur3 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Mağdurun teşhisini kolaylaştıracak belirgin bir özelliği var mıydı? Varsa neydi?:", name: "magdur3", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const magdur4 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Mağdur ne giyinmişti?:", name: "magdur4", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const cevresel1 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Olaya tanıklık eden başka kimler vardı? Bu kişilere ait özellikleri anlatır mısınız?:", name: "cevresel1", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const cevresel2 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Olay anında mekandaki diğer insanlar neler yapıyorlardı?:", name: "cevresel2", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const cevresel3 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Mekana ilişkin hatırladıklarınızı anlatır mısınız?:", name: "cevresel3", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const cevresel4 = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Masada neler vardı?:", name: "cevresel4", required: true }],
+    button_label: "Onaylıyorum"
+};
+
 const bitis = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
@@ -191,7 +251,9 @@ jsPsych.run([
     suc_magdur, suc_tanik,
     etkileme, duygusallik,
     olay1, olay2, olay3, olay4,
-    fail1, fail2,
+    fail1, fail2, fail3, fail4,
+    magdur1, magdur2, magdur3, magdur4,
+    cevresel1, cevresel2, cevresel3, cevresel4,
     bitis
 ]);
 
