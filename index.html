@@ -234,6 +234,12 @@ const cevresel4 = {
     questions: [{ prompt: "Masada neler vardı?:", name: "cevresel4", required: true }],
     button_label: "Onaylıyorum"
 };
+    
+const email = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "E-posta adresinizi giriniz:", name: "email", required: true }],
+    button_label: "Onaylıyorum"
+};
 
 const bitis = {
     type: jsPsychHtmlButtonResponse,
@@ -246,7 +252,7 @@ const bitis = {
 
 jsPsych.run([
     hosgeldin, video,
-    okul_num, yas, cinsiyet, egitim,
+    okul_num, email, yas, cinsiyet, egitim,
     gercekcilik, failceza,
     suc_magdur, suc_tanik,
     etkileme, duygusallik,
