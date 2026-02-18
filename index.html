@@ -1,1 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Deney</title>
+    <script src="https://unpkg.com/jspsych@7.3.4"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@1.1.3"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-video-button-response@1.1.3"></script>
+    <link rel="stylesheet" href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .jspsych-content { max-width: 800px; }
+        video { max-width: 100%; margin-bottom: 20px; }
+        .jspsych-btn { font-size: 18px; padding: 12px 30px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+<script>
 
+const jsPsych = initJsPsych({
+    on_finish: function() {
+        jsPsych.data.get().localSave('csv', 'deney_verisi.csv');
+    }
+});
+
+const videolar = ["video1.mp4", "video2.mp4", "video3.mp4"];
+const secilenVideo = jsPsych.randomization.sampleWithoutReplacement(videolar, 1)[0];
+
+const hosgeldin = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+        <h2>Araştırmaya Hoş Geldiniz</h2>
+        <p style="font-size:17px;line-height:1.7;max-width:600px;margin:auto;">
+            Bu araştırmada size kısa bir video izletilecek ve ardından birkaç soru sorulacaktır.<br><br>
+            Katılımınız tamamen gönüllülük esasına dayanmakta ve verileriniz anonim tutulacaktır.
+        </p>
+    `,
+    choices: ["Başla"]
+};
+
+const video = {
+    type: jsPsychVideoButtonResponse,
+    stimulus: [secilenVideo],
+    choices: ["Devam Et"],
+    response_allowed_while_playing: false,
+    width: 800,
+    data: { video_gosterilen: secilenVideo }
+};
+
+const okul_num = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Okul numaranızı giriniz:", name: "okul_num", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const yas = {
+    type: jsPsychSurveyText,
+    questions: [{ prompt: "Yaşınızı giriniz:", name: "yas", required: true }],
+    button_label: "Onaylıyorum"
+};
+
+const cinsiyet = {
+    type: jsPsychSurveyMultiChoice,
+    questions: [{
+        prompt: "Cinsiyetiniz:",
+        name: "cinsiyet",
+        options: ["Kadın", "Erkek", "Belirtmek İstemiyorum"],
+        required: true
+    }],
+    button_label: "Onaylıyorum"
+};
+
+const egitim = {
+    type: jsPsychSurveyMultiChoice,
+    questions: [{
+        prompt: "Eğitim durumunuz:",
+        name: "egitim",
+        options: ["İlkokul", "Ortaokul", "Lise", "Üniversite", "Yüksek Lisans", "Doktora"],
+        required: true
+    }],
+    button_label: "Onaylıyorum"
+};
+
+const bitis = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+        <h2>Teşekkürler!</h2>
+        <p style="font-size:17px;">Katılımınız için teşekkür ederiz. Verileriniz kaydedildi.</p>
+    `,
+    choices: ["Bitir"]
+};
+
+jsPsych.run([hosgeldin, video, okul_num, yas, cinsiyet, egitim, bitis]);
+
+</script>
+</body>
+</html>
