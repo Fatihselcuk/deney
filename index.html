@@ -45,7 +45,7 @@ video{max-width:100%;border-radius:8px}
 
 .option{margin:8px;text-align:left}
 
-input, select{
+select,input{
   padding: 8px;
   margin-top: 8px;
   width: 100%;
@@ -84,42 +84,28 @@ Katılım gönüllüdür.
 <div id="survey" class="container hidden">
 <h2>Demografik Bilgiler</h2>
 
-<div class="form-group">
-<p>Yaş</p>
-<input type="number" id="age">
-</div>
+<input type="number" id="age" placeholder="Yaş">
 
-<div class="form-group">
-<p>Cinsiyet</p>
 <select id="gender">
 <option>Kadın</option>
 <option>Erkek</option>
 <option>Kuir</option>
 <option>Belirtmek istemiyorum</option>
 </select>
-</div>
 
-<div class="form-group">
-<p>Doğum aralığı</p>
 <select id="birth">
 <option>1965-1980</option>
 <option>1981-1996</option>
 <option>1997-2012</option>
 </select>
-</div>
 
-<div class="form-group">
-<p>Çalışma durumu</p>
 <select id="work">
 <option>Çalışıyorum</option>
 <option>Çalışmıyorum</option>
 <option>Öğrenciyim</option>
 <option>İş arıyorum</option>
 </select>
-</div>
 
-<div class="form-group">
-<p>Eğitim</p>
 <select id="edu">
 <option>İlköğretim</option>
 <option>Lise</option>
@@ -128,7 +114,6 @@ Katılım gönüllüdür.
 <option>Yüksek Lisans</option>
 <option>Doktora</option>
 </select>
-</div>
 
 <button onclick="startExperiment()">Devam</button>
 </div>
@@ -138,8 +123,6 @@ Katılım gönüllüdür.
 <h2 id="videoLabel"></h2>
 
 <video id="video" controls></video>
-
-<p id="warning" class="hidden">Video bitmeden devam edemezsiniz</p>
 
 <button onclick="goToQuestions()">Sorulara geç</button>
 </div>
@@ -151,10 +134,20 @@ Katılım gönüllüdür.
 <button onclick="submitAnswer()">Cevapla</button>
 </div>
 
+<!-- ================= SURVEY ================= -->
+<div id="surveyScreen" class="container hidden">
+
+<h2 id="surveyTitle"></h2>
+
+<div id="surveyOptions"></div>
+
+<button onclick="nextSurvey()">Devam</button>
+
+</div>
+
 <!-- ================= END ================= -->
 <div id="end" class="container hidden">
 <h2>Deney tamamlandı</h2>
-<button onclick="startSurveys()">Anketlere geç</button>
 <button onclick="downloadCSV()">Veriyi indir</button>
 </div>
 
@@ -176,8 +169,9 @@ let group = Math.random()<0.5?'A':'B';
 
 let videoIndex=0;
 let questionIndex=0;
+let surveyIndex=0;
+
 let startTime;
-let videoEnded=false;
 
 let responses=[];
 
@@ -185,8 +179,7 @@ let responses=[];
 const videosA=["V1.mp4","V2.mp4","V3.mp4","V4.mp4","V5.mp4","V6.mp4","V7.mp4","V8.mp4","V9.mp4"];
 const videosB=["V10.mp4","V11.mp4","V12.mp4","V13.mp4","V14.mp4","V15.mp4","V16.mp4","V17.mp4","V18.mp4"];
 
-/* ================= FULL QUESTION SET (FIXED) ================= */
-
+/* ================= QUESTIONS ================= */
 const questionsA = {
 0:[{q:"March ailesi kaç kız kardeş?",opts:["2","3","4","5"]},
 {q:"Anne hangi değer?",opts:["Fedakarlık","Dayanışma","Hayal","Statü"]},
@@ -225,7 +218,35 @@ const questionsA = {
 {q:"Tema?",opts:["Kariyer","Sosyal","Bakım","Hobi"]}]
 };
 
-const questionsB = questionsA; // (placeholder mapping — istersek farklılaştırırız)
+const questionsB = questionsA;
+
+/* ================= SURVEYS ================= */
+const surveys=[
+{
+name:"Anket 1",
+items:[
+"Kadının çocuğa bakması gerekir.",
+"Kadınlar iş hayatında başarılı olabilir.",
+"Kadınların çalışması sakıncalıdır."
+]
+},
+{
+name:"Anket 2",
+items:[
+"Evlilik çalışmaya engel değildir.",
+"Kadınlar yönetici olabilir.",
+"Erkek evin reisidir."
+]
+},
+{
+name:"Anket 3",
+items:[
+"Gelecekten korkuyorum.",
+"Başarısız olmaktan korkuyorum.",
+"Gelecek belirsizdir."
+]
+}
+];
 
 /* ================= FLOW ================= */
 
@@ -236,21 +257,13 @@ loadVideo();
 }
 
 function loadVideo(){
-videoEnded=false;
-
 let list = group==='A'?videosA:videosB;
-document.getElementById("video").src = list[videoIndex];
 
+document.getElementById("video").src=list[videoIndex];
 document.getElementById("videoLabel").innerText="Video "+(videoIndex+1);
-document.getElementById("video").onended=()=>videoEnded=true;
 }
 
 function goToQuestions(){
-if(!videoEnded){
-document.getElementById("warning").classList.remove("hidden");
-return;
-}
-
 document.getElementById("videoScreen").classList.add("hidden");
 document.getElementById("questionScreen").classList.remove("hidden");
 
@@ -276,10 +289,12 @@ startTime=Date.now();
 }
 
 function submitAnswer(){
+
 let sel=document.querySelector("input[name='ans']:checked");
 if(!sel)return alert("Seçim yap");
 
 responses.push({
+type:"question",
 group,
 video:videoIndex+1,
 question:questionIndex+1,
@@ -299,23 +314,78 @@ document.getElementById("questionScreen").classList.add("hidden");
 document.getElementById("videoScreen").classList.remove("hidden");
 loadVideo();
 }else{
-document.getElementById("questionScreen").classList.add("hidden");
-document.getElementById("end").classList.remove("hidden");
+startSurveys();
 }
+}
+}
+
+/* ================= SURVEY ENGINE ================= */
+
+function startSurveys(){
+document.getElementById("questionScreen").classList.add("hidden");
+document.getElementById("surveyScreen").classList.remove("hidden");
+
+loadSurvey();
+}
+
+function loadSurvey(){
+
+let s=surveys[surveyIndex];
+
+document.getElementById("surveyTitle").innerText=s.name;
+
+let html="";
+
+s.items.forEach((q,i)=>{
+html+=`
+<p>${q}</p>
+<select id="s_${i}">
+<option>1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+</select>
+`;
+});
+
+document.getElementById("surveyOptions").innerHTML=html;
+}
+
+function nextSurvey(){
+
+let s=surveys[surveyIndex];
+
+s.items.forEach((_,i)=>{
+responses.push({
+type:"survey",
+survey:s.name,
+item:i,
+value:document.getElementById("s_"+i).value
+});
+});
+
+surveyIndex++;
+
+if(surveyIndex<surveys.length){
+loadSurvey();
+}else{
+downloadCSV();
 }
 }
 
 /* ================= EXPORT ================= */
 
 function downloadCSV(){
-let csv="type,group,video,question,answer,rt\n";
+
+let csv="type,group,video,question,survey,item,answer,rt\n";
 
 responses.forEach(r=>{
-csv+=`task,${r.group},${r.video},${r.question},${r.answer},${r.rt}\n`;
+csv+=`${r.type||""},${r.group||""},${r.video||""},${r.question||""},${r.survey||""},${r.item||""},${r.answer||r.value||""},${r.rt||""}\n`;
 });
 
-const blob=new Blob([csv]);
-const a=document.createElement("a");
+let blob=new Blob([csv]);
+let a=document.createElement("a");
 a.href=URL.createObjectURL(blob);
 a.download="data.csv";
 a.click();
