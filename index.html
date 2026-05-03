@@ -1,299 +1,414 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>Deney</title>
-    <script src="https://unpkg.com/jspsych@7.3.4"></script>
-    <script src="https://unpkg.com/@jspsych/plugin-html-button-response@1.1.3"></script>
-    <script src="https://unpkg.com/@jspsych/plugin-survey-text@1.1.3"></script>
-    <script src="https://unpkg.com/@jspsych/plugin-survey-multi-choice@1.1.3"></script>
-    <script src="https://unpkg.com/@jspsych/plugin-video-button-response@1.1.3"></script>
-    <link rel="stylesheet" href="https://unpkg.com/jspsych@7.3.4/css/jspsych.css">
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .jspsych-content { max-width: 800px; }
-        video { max-width: 100%; margin-bottom: 20px; }
-        .jspsych-btn { font-size: 18px; padding: 12px 30px; margin-top: 10px; }
-    </style>
+<meta charset="UTF-8">
+<title>Deney</title>
+
+<style>
+body{font-family:Arial;background:#111;color:#fff;text-align:center}
+.container{max-width:900px;margin:40px auto;background:#222;padding:20px;border-radius:10px}
+.hidden{display:none}
+button{padding:12px 20px;margin-top:15px;font-size:16px}
+video{max-width:100%}
+.option{margin:8px}
+input, select{padding:8px;margin-top:8px}
+p{line-height:1.5}
+</style>
+
 </head>
+
 <body>
+
+<!-- ================= CONSENT ================= -->
+<div id="consent" class="container">
+<h2>Bilgilendirilmiş Onam Formu</h2>
+
+<p style="text-align:left;max-height:300px;overflow:auto">
+Sayın katılımcı,<br><br>
+Sizi İstinye Üniversitesinde yürütülen “Kadınların Film Sektöründeki Temsili Bağlamında Medya Okuryazarlığı ve Kısa-Dönem Hafıza İlişkisinin İncelenmesi” başlıklı araştırmaya davet ediyoruz.<br><br>
+
+Gönüllü olarak katılmanızı teklif ettiğimiz bu araştırmanın amacı, bireylerin medya içeriklerini izlerken gösterdikleri dikkat, medya okuryazarlığı düzeyleri ve kısa dönem hafıza süreçleri arasındaki ilişkiyi incelemektir.<br><br>
+
+Katılımcılar 9 kısa video izleyecek ve ardından bu videolarla ilgili soruları yanıtlayacaktır. Sonrasında 3 ayrı ölçek uygulanacaktır.<br><br>
+
+Katılım süresi 5–10 dakikadır ve tamamen gönüllülük esasına dayanır.
+</p>
+
+<button onclick="acceptConsent()">Çalışmaya katılıyorum</button>
+<button onclick="declineConsent()">Katılmıyorum</button>
+</div>
+
+<!-- ================= DEMOGRAPHIC ================= -->
+<div id="survey" class="container hidden">
+<h2>Demografik Bilgiler</h2>
+
+<p>Yaş</p>
+<input type="number" id="age">
+
+<p>Cinsiyet</p>
+<select id="gender">
+<option>Kadın</option>
+<option>Erkek</option>
+<option>Kuir</option>
+<option>Belirtmek istemiyorum</option>
+</select>
+
+<p>Doğum aralığı</p>
+<select id="birth">
+<option>1965-1980</option>
+<option>1981-1996</option>
+<option>1997-2012</option>
+</select>
+
+<p>Çalışma durumu</p>
+<select id="work">
+<option>Çalışıyorum</option>
+<option>Çalışmıyorum</option>
+<option>Öğrenciyim</option>
+<option>İş arıyorum</option>
+</select>
+
+<p>Eğitim</p>
+<select id="edu">
+<option>İlköğretim</option>
+<option>Lise</option>
+<option>MYO</option>
+<option>Lisans</option>
+<option>Yüksek Lisans</option>
+<option>Doktora</option>
+</select>
+
+<button onclick="startExperiment()">Devam</button>
+</div>
+
+<!-- ================= VIDEO ================= -->
+<div id="videoScreen" class="container hidden">
+<h2 id="videoLabel"></h2>
+
+<video id="video" controls></video>
+
+<p id="warning" class="hidden">Video bitmeden devam edemezsiniz</p>
+
+<button onclick="goToQuestions()">Devam</button>
+</div>
+
+<!-- ================= QUESTIONS ================= -->
+<div id="questionScreen" class="container hidden">
+<h2 id="questionText"></h2>
+<div id="options"></div>
+<button onclick="submitAnswer()">Cevapla</button>
+</div>
+
+<!-- ================= END ================= -->
+<div id="end" class="container hidden">
+<h2>Deney tamamlandı</h2>
+<button onclick="startSurveys()">Anketlere geç</button>
+<button onclick="downloadCSV()">Veriyi indir</button>
+</div>
+
 <script>
 
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycbz45PK1M7gZ_lTIJiXh8UvPHiI-6LD6RmlTPskarMVeybcPGOF5kslK9_BXvA2cOd6Sng/exec";
+/* ================= STATE ================= */
+let group = Math.random()<0.5?'A':'B';
+let videoIndex=0;
+let questionIndex=0;
+let startTime;
 
-const jsPsych = initJsPsych({
-    on_finish: function() {
-        const sutunlar = [
-            "video_gosterilen","okul_num","email","yas","cinsiyet","egitim",
-            "gercekcilik","failceza","suc_magdur","suc_tanik","etkileme","duygusallik",
-            "olay1","olay2","olay3","olay4",
-            "fail1","fail2","fail3","fail4",
-            "magdur1","magdur2","magdur3","magdur4",
-            "cevresel1","cevresel2","cevresel3","cevresel4"
-        ];
+let responses=[];
+let surveyResponses=[];
 
-        const veri = {};
-        const tumVeri = jsPsych.data.get().values();
+let videoEnded=false;
+let surveyIndex=0;
 
-        const videoTrial = tumVeri.find(t => t.video_gosterilen);
-        veri["video_gosterilen"] = videoTrial ? videoTrial.video_gosterilen : "";
+/* ================= VIDEOS ================= */
+const videosA=["V1.mp4","V2.mp4","V3.mp4","V4.mp4","V5.mp4","V6.mp4","V7.mp4","V8.mp4","V9.mp4"];
+const videosB=["V10.mp4","V11.mp4","V12.mp4","V13.mp4","V14.mp4","V15.mp4","V16.mp4","V17.mp4","V18.mp4"];
 
-        tumVeri.forEach(t => {
-            if (t.response) {
-                Object.keys(t.response).forEach(key => {
-                    veri[key] = t.response[key];
-                });
-            }
-        });
+/* ================= QUESTIONS A (1-9) ================= */
+const questionsA={
+0:[{q:"March ailesi kaç kız kardeşten oluşmaktadır?",opts:["2","3","4","5"]},
+{q:"Marmee hangi değeri aşılar?",opts:["Fedakarlık","Dayanışma","Hayaller","Statü"]},
+{q:"Meg kiminle evlenir?",opts:["Laurie","Bhaer","John Brooke","James"]}],
 
-        // Google Sheets'e gönder
-        fetch(SHEETS_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(veri)
-        });
-    }
+1:[{q:"Dil nedir?",opts:["İngilizce","Fransızca","İtalyanca","Almanca"]},
+{q:"Anne ne yapıyor?",opts:["Meyve","Reçel","Gevrek","Yumurta"]},
+{q:"Ev işi?",opts:["Yer silme","Çamaşır","Bulaşık","Ütü"]}],
+
+2:[{q:"Dönem?",opts:["Gelecek","19.yy","Günümüz","Masal"]},
+{q:"Çocuk sayısı?",opts:["1","2","3","Yok"]},
+{q:"Rutin?",opts:["Ofis","Spor","Ev işi","Sosyal"]}],
+
+3:[{q:"Meslek?",opts:["Öğretmen","Temizlik","Kafe","Banka"]},
+{q:"Renk?",opts:["Mavi","Sarı","Bordo","Yeşil"]},
+{q:"Stres?",opts:["Akademik","Arkadaş","Ev-iş","Dil"]}],
+
+4:[{q:"Yaşam tarzı?",opts:["Kariyer","Bakım","Ev","Yardım"]},
+{q:"Uyarlama?",opts:["Grey","Desperate","SATC","Big Little"]},
+{q:"Sandık?",opts:["Foto","Mutfak","Dantel","Kitap"]}],
+
+5:[{q:"Oyuncu?",opts:["Saoirse","Florence","Emma","Anya"]},
+{q:"Sembol?",opts:["Temizlik","Taşınma","Ev kadını","Spor"]},
+{q:"Aksesuar?",opts:["Beyaz","Siyah","Kırmızı","Mavi"]}],
+
+6:[{q:"Dizi?",opts:["Virgin","Ginny","Sweet","Firefly"]},
+{q:"Sahne?",opts:["Şef","Parti","Ev","Ofis"]},
+{q:"Renk?",opts:["Siyah","Bakır","Kırmızı","Beyaz"]}],
+
+7:[{q:"Bebek?",opts:["Tezgah","Masa","Oda","Pencere"]},
+{q:"Oyuncu?",opts:["Kidman","Theron","Blanchett","Lawrence"]},
+{q:"Ortam?",opts:["Neon","Loş","Gün","Karanlık"]}],
+
+8:[{q:"Ülke?",opts:["İspanya","Türkiye","Yunanistan","Fransa"]},
+{q:"Buzdolabı?",opts:["Tarif","Magnet","Takvim","Liste"]},
+{q:"Tema?",opts:["Kariyer","Sosyal","Bakım","Hobi"]}]
+};
+
+/* ================= QUESTIONS B (10-18) ================= */
+const questionsB={
+0:[{q:"Yapım?",opts:["Mindhunter","Criminal Minds","All Her Fault","Night Agent"]},
+{q:"Hikaye?",opts:["Seri katil","Kayıp çocuk","Avukat","Skandal"]},
+{q:"Görev?",opts:["Konum","Soygun","Casus","Finans"]}],
+
+1:[{q:"Olay?",opts:["Tahliye","Patlama","Nesne","Siber"]},
+{q:"Neden?",opts:["Casus","Çeviri","Ses","Dil"]},
+{q:"Mekan?",opts:["Uzay","Üs","Üniversite","Şehir"]}],
+
+2:[{q:"Ad?",opts:["Monica","Lacie","Sarah","Elena"]},
+{q:"Kriter?",opts:["Verim","Referans","Sosyal","Memnuniyet"]},
+{q:"Renk?",opts:["Koyu","Neon","Pastel","Metal"]}],
+
+3:[{q:"Kurum?",opts:["Belediye","Santral","Hastane","Emniyet"]},
+{q:"Dönem?",opts:["50","60","70","80"]},
+{q:"Ülke?",opts:["Almanya","ABD","İspanya","Fransa"]}],
+
+4:[{q:"Ad?",opts:["Amelia","Lois","Murphy","Getty"]},
+{q:"Söz?",opts:["Buldum","Eureka","Başardık","Yaşasın"]},
+{q:"Nesne?",opts:["Kitap","Pusula","Saat","Madalyon"]}],
+
+5:[{q:"Alan?",opts:["Biyoloji","Dilbilim","Antropoloji","Sanat"]},
+{q:"Üniversite?",opts:["Harvard","Columbia","Oxford","Stanford"]},
+{q:"Oyun?",opts:["Kelime","Sayı","Şekil","Nesne"]}],
+
+6:[{q:"Departman?",opts:["Finans","İK","Hukuk","IT"]},
+{q:"Özellik?",opts:["Lider","Sosyal","Meraklı","Sabırlı"]},
+{q:"Alan?",opts:["Pencere","Tavan","Zemin","Yatak"]}],
+
+7:[{q:"Rutin?",opts:["Haber","Eski","Mesaj","Rakip"]},
+{q:"Nesne?",opts:["Kupa","Ayna","Çiçek","Peluş"]},
+{q:"Program?",opts:["Sabah","Akşam","Yarışma","Talk"]}],
+
+8:[{q:"Departman?",opts:["Satış","Çağrı","Haber","İletişim"]},
+{q:"Tür?",opts:["Komedi","Dram","Polisiye","Gerilim"]},
+{q:"Şehir?",opts:["NY","LA","Londra","Paris"]}]
+};
+
+/* ================= CONSENT ================= */
+function acceptConsent(){
+consent.classList.add('hidden');
+survey.classList.remove('hidden');
+}
+function declineConsent(){
+consent.classList.add('hidden');
+end.classList.remove('hidden');
+}
+
+/* ================= START ================= */
+function startExperiment(){
+survey.classList.add('hidden');
+videoScreen.classList.remove('hidden');
+loadVideo();
+}
+
+/* ================= VIDEO ================= */
+function loadVideo(){
+videoEnded=false;
+const list=group==='A'?videosA:videosB;
+video.src=list[videoIndex];
+videoLabel.innerText="Video "+(videoIndex+1);
+video.onended=()=>videoEnded=true;
+}
+
+function goToQuestions(){
+if(!videoEnded){
+warning.classList.remove('hidden');
+return;
+}
+videoScreen.classList.add('hidden');
+questionScreen.classList.remove('hidden');
+questionIndex=0;
+loadQuestion();
+}
+
+/* ================= QUESTIONS ================= */
+function loadQuestion(){
+const qset=(group==='A'?questionsA:questionsB)[videoIndex];
+const q=qset[questionIndex];
+
+questionText.innerText=q.q;
+options.innerHTML="";
+
+q.opts.forEach(o=>{
+options.innerHTML+=`<div class='option'><input type='radio' name='ans' value='${o}'> ${o}</div>`;
 });
 
-const videolar = ["video1.mp4", "video2.mp4", "video3.mp4"];
-const secilenVideo = jsPsych.randomization.sampleWithoutReplacement(videolar, 1)[0];
+startTime=Date.now();
+}
 
-const hosgeldin = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `
-        <h2>Araştırmaya Hoş Geldiniz</h2>
-        <p style="font-size:17px;line-height:1.7;max-width:600px;margin:auto;">
-            Bu araştırmada size kısa bir video izletilecek ve ardından birkaç soru sorulacaktır.<br><br>
-            Katılımınız tamamen gönüllülük esasına dayanmaktadır ve verileriniz anonim tutulacaktır.
-        </p>
-    `,
-    choices: ["Başla"]
-};
+function submitAnswer(){
+const sel=document.querySelector(\"input[name='ans']:checked\");
+if(!sel)return alert(\"Seçim yap\");
 
-const video = {
-    type: jsPsychVideoButtonResponse,
-    stimulus: [secilenVideo],
-    choices: ["Devam Et"],
-    response_allowed_while_playing: false,
-    width: 800,
-    data: { video_gosterilen: secilenVideo }
-};
+responses.push({
+group,
+video:videoIndex+1,
+question:questionIndex+1,
+answer:sel.value,
+rt:Date.now()-startTime
+});
 
-const okul_num = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Okul numaranızı giriniz:", name: "okul_num", required: true }],
-    button_label: "Onaylıyorum"
-};
+questionIndex++;
 
-const email = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "E-posta adresinizi giriniz:", name: "email", required: true }],
-    button_label: "Onaylıyorum"
-};
+if(questionIndex<3){
+loadQuestion();
+}else{
+videoIndex++;
 
-const yas = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Yaşınızı giriniz:", name: "yas", required: true }],
-    button_label: "Onaylıyorum"
-};
+if(videoIndex<9){
+questionScreen.classList.add('hidden');
+videoScreen.classList.remove('hidden');
+loadVideo();
+}else{
+questionScreen.classList.add('hidden');
+end.classList.remove('hidden');
+}
+}
+}
 
-const cinsiyet = {
-    type: jsPsychSurveyMultiChoice,
-    questions: [{
-        prompt: "Cinsiyetiniz:",
-        name: "cinsiyet",
-        options: ["Kadın", "Erkek", "Belirtmek İstemiyorum"],
-        required: true
-    }],
-    button_label: "Onaylıyorum"
-};
+/* ================= SURVEYS ================= */
+const surveys=[
+/* Anket 1 */
+[
+"İyi nesiller yetiştirmek için kadın çocuğuna bakmalıdır",
+"Kadınlar işte başarılı olabilir",
+"Kadın çalışması işsizliği artırır",
+"Kadınlar verimsizdir",
+"Kadın cinselliği kullanır",
+"Çocuk sevgisiz büyür",
+"Kadın çalışmalı",
+"Erkekler tahrik olur",
+"Yarı zamanlı çalışmalı",
+"Kadın sorun çözemez",
+"Kadın çalışmamalı",
+"İş yerinde ilişki olur",
+"Kadının görevi evdir",
+"Kadın çalışabilmelidir",
+"Kalkınmayı artırır"
+],
 
-const egitim = {
-    type: jsPsychSurveyMultiChoice,
-    questions: [{
-        prompt: "Eğitim durumunuz:",
-        name: "egitim",
-        options: ["Lise", "Üniversite", "Yüksek Lisans", "Doktora"],
-        required: true
-    }],
-    button_label: "Onaylıyorum"
-};
+/* Anket 2 */
+[
+"Evlilik çalışmaya engel değil",
+"Kadın sadece zorunluysa çalışır",
+"Çalışan kadın anne olabilir",
+"Kadın çalışmamalı",
+"Siyasette başarılı olur",
+"Evlilikten sonra çalışmamalı",
+"Ev işi aksamaz",
+"Mutluluk artar",
+"Kadın korunmalı",
+"Koca izin vermezse çalışmaz",
+"Yönetici olabilir",
+"Gelirini vermeli",
+"Daha iyi anne olur",
+"Erkek ev işi yapmalı",
+"Kocasız kadın sahipsiz",
+"Erkek gelir sağlar",
+"İş kurmamalı",
+"Ev görevidir",
+"Fazla kazanmamalı",
+"Erkek reis",
+"Lider erkek",
+"Eşit özgürlük",
+"Karşı çıkabilir",
+"Daha küçük olmalı",
+"Karar erkek"
+],
 
-const gercekcilik = {
-    type: jsPsychSurveyMultiChoice,
-    questions: [{
-        prompt: "İzlediğiniz görüntüleri ne kadar gerçekçi buldunuz?",
-        name: "gercekcilik",
-        options: ["1", "2", "3", "4", "5"],
-        required: true
-    }],
-    button_label: "Onaylıyorum"
-};
+/* Anket 3 */
+[
+"Korku uzun sürer",
+"Başarısızlık korkusu",
+"Hayat kötüleşir",
+"Zorluk korkusu",
+"Aksilik korkusu",
+"Kötü şey beklerim",
+"Gelecek korkutur",
+"Maddi kaygı",
+"Planlar yarım kalır",
+"Gelecek belirsiz",
+"Ekonomi korkutur",
+"Karar korkusu",
+"Felaket korkusu"
+]
+];
 
-const failceza = {
-    type: jsPsychSurveyMultiChoice,
-    questions: [{
-        prompt: "Faile sizce ne kadar ceza verilmeli?",
-        name: "failceza",
-        options: ["1 yıldan az", "1-5 yıl arası", "5 yıldan fazla"],
-        required: true
-    }],
-    button_label: "Onaylıyorum"
-};
+function startSurveys(){
+videoScreen.classList.add('hidden');
+questionScreen.classList.add('hidden');
+end.innerHTML=renderSurvey(0);
+end.classList.remove('hidden');
+}
 
-const suc_magdur = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Daha önce suç mağduru oldunuz mu? Olduysanız suçun türü nedir:", name: "suc_magdur", required: true }],
-    button_label: "Onaylıyorum"
-};
+function renderSurvey(i){
+let html=`<h2>Anket ${i+1}</h2>`;
+surveys[i].forEach((q,idx)=>{
+html+=`<p>${q}</p>
+<select id='s${i}_${idx}'>
+<option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+</select>`;
+});
+html+=`<br><button onclick='nextSurvey(${i})'>Devam</button>`;
+return html;
+}
 
-const suc_tanik = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Daha önce suça tanık oldunuz mu? Olduysanız suçun türü nedir:", name: "suc_tanik", required: true }],
-    button_label: "Onaylıyorum"
-};
+function nextSurvey(i){
+for(let j=0;j<surveys[i].length;j++){
+surveyResponses.push({
+survey:i+1,
+item:j+1,
+value:document.getElementById(`s${i}_${j}`).value
+});
+}
 
-const etkileme = {
-    type: jsPsychSurveyMultiChoice,
-    questions: [{
-        prompt: "İzlediğiniz görüntülerin sizi ne kadar etkilediğini puanlayınız? 1- En az 7 - En çok şeklinde cevaplayınız:",
-        name: "etkileme",
-        options: ["1", "2", "3", "4", "5", "6", "7"],
-        required: true
-    }],
-    button_label: "Onaylıyorum"
-};
+if(i<2){
+end.innerHTML=renderSurvey(i+1);
+}else{
+end.innerHTML=`<h2>Deney tamamlandı</h2><button onclick='downloadCSV()'>Veriyi indir</button>`;
+}
+}
 
-const duygusallik = {
-    type: jsPsychSurveyMultiChoice,
-    questions: [{
-        prompt: "İzlediğiniz görüntünün ne kadar duygusallık içerdiğini puanlayınız. 1- En az 7 - En çok şeklinde cevaplayınız:",
-        name: "duygusallik",
-        options: ["1", "2", "3", "4", "5", "6", "7"],
-        required: true
-    }],
-    button_label: "Onaylıyorum"
-};
+/* ================= EXPORT ================= */
+function downloadCSV(){
+let csv=\"type,group,video,question,answer,rt\\n\";
 
-const olay1 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Görüntülerde ne oldu?:", name: "olay1", required: true }],
-    button_label: "Onaylıyorum"
-};
+responses.forEach(r=>{
+csv+=`task,${r.group},${r.video},${r.question},${r.answer},${r.rt}\\n`;
+});
 
-const olay2 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Olayı kim başlattı?:", name: "olay2", required: true }],
-    button_label: "Onaylıyorum"
-};
+surveyResponses.forEach(s=>{
+csv+=`survey,${group},${s.survey},${s.item},${s.value},0\\n`;
+});
 
-const olay3 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Olaya müdahale eden kimse oldu mu?:", name: "olay3", required: true }],
-    button_label: "Onaylıyorum"
-};
+const blob=new Blob([csv]);
+const a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download=\"experiment_data.csv\";
+a.click();
+}
 
-const olay4 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Olay nasıl sonlandı?:", name: "olay4", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const fail1 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Bu olayda sizce fail kim?:", name: "fail1", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const fail2 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Failin eşgalini verebilir misiniz? Failin fiziksel özelliklerini anlatır mısınız?:", name: "fail2", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const fail3 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Failin teşhisini kolaylaştıracak belirgin bir özelliği var mıydı? Varsa neydi?:", name: "fail3", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const fail4 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Fail nasıl giyinmişti?:", name: "fail4", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const magdur1 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Bu olayda sizce mağdur kimdir?:", name: "magdur1", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const magdur2 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Mağdurun fiziksel özelliklerini anlatır mısınız?:", name: "magdur2", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const magdur3 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Mağdurun teşhisini kolaylaştıracak belirgin bir özelliği var mıydı? Varsa neydi?:", name: "magdur3", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const magdur4 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Mağdur ne giyinmişti?:", name: "magdur4", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const cevresel1 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Olaya tanıklık eden başka kimler vardı? Bu kişilere ait özellikleri anlatır mısınız?:", name: "cevresel1", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const cevresel2 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Olay anında mekandaki diğer insanlar neler yapıyorlardı?:", name: "cevresel2", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const cevresel3 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Mekana ilişkin hatırladıklarınızı anlatır mısınız?:", name: "cevresel3", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const cevresel4 = {
-    type: jsPsychSurveyText,
-    questions: [{ prompt: "Masada neler vardı?:", name: "cevresel4", required: true }],
-    button_label: "Onaylıyorum"
-};
-
-const bitis = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `
-        <h2>Teşekkürler!</h2>
-        <p style="font-size:17px;">Katılımınız için teşekkür ederiz. Verileriniz kaydedildi.</p>
-    `,
-    choices: ["Bitir"]
-};
-
-jsPsych.run([
-    hosgeldin, video,
-    okul_num, email, yas, cinsiyet, egitim,
-    gercekcilik, failceza,
-    suc_magdur, suc_tanik,
-    etkileme, duygusallik,
-    olay1, olay2, olay3, olay4,
-    fail1, fail2, fail3, fail4,
-    magdur1, magdur2, magdur3, magdur4,
-    cevresel1, cevresel2, cevresel3, cevresel4,
-    bitis
-]);
+window.onload=()=>{document.documentElement.requestFullscreen?.();};
 
 </script>
+
 </body>
 </html>
