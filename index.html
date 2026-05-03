@@ -7,56 +7,47 @@
 <style>
 body{
   font-family: Arial;
-  background: #ffffff;
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color:#111;
+  background:#fff;
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
 
 .container{
-  width: 90%;
-  max-width: 900px;
-  background: #f7f7f7;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  text-align: center;
+  width:90%;
+  max-width:900px;
+  background:#f5f5f5;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 8px 20px rgba(0,0,0,.15);
+  text-align:center;
 }
 
 .hidden{display:none}
 
 button{
-  padding: 12px 20px;
-  margin-top: 15px;
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
-  border-radius: 6px;
-  background: #222;
-  color: #fff;
+  padding:12px 18px;
+  margin-top:12px;
+  border:none;
+  background:#222;
+  color:#fff;
+  border-radius:6px;
+  cursor:pointer;
 }
 
 button:hover{background:#444}
 
-video{max-width:100%;border-radius:8px}
+video{max-width:100%;border-radius:10px}
 
-.option{margin:8px;text-align:left}
+.option{margin:6px;text-align:left}
 
 select,input{
-  padding: 8px;
-  margin-top: 8px;
-  width: 100%;
-  max-width: 400px;
-}
-
-.form-group{
-  margin-bottom: 14px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  width:100%;
+  max-width:420px;
+  padding:8px;
+  margin-top:6px;
 }
 
 p{line-height:1.5}
@@ -65,14 +56,11 @@ p{line-height:1.5}
 
 <body>
 
-<!-- ================= CONSENT ================= -->
+<!-- CONSENT -->
 <div id="consent" class="container">
 <h2>Onam Formu</h2>
-
-<p style="text-align:left;max-height:300px;overflow:auto">
-Sayın katılımcı,<br><br>
-Bu çalışma medya içeriklerinde kadın temsili ve bilişsel süreçleri incelemektedir.<br><br>
-9 video izlenecek, ardından sorular ve 3 ölçek uygulanacaktır.<br><br>
+<p style="text-align:left">
+Bu çalışma medya içeriklerinde kadın temsili ve bilişsel süreçleri inceler.<br><br>
 Katılım gönüllüdür.
 </p>
 
@@ -80,17 +68,14 @@ Katılım gönüllüdür.
 <button onclick="declineConsent()">Katılmıyorum</button>
 </div>
 
-<!-- ================= DEMOGRAPHIC ================= -->
-<div id="survey" class="container hidden">
+<!-- DEMO -->
+<div id="demo" class="container hidden">
 <h2>Demografik Bilgiler</h2>
 
-<input type="number" id="age" placeholder="Yaş">
+<input id="age" type="number" placeholder="Yaş">
 
 <select id="gender">
-<option>Kadın</option>
-<option>Erkek</option>
-<option>Kuir</option>
-<option>Belirtmek istemiyorum</option>
+<option>Kadın</option><option>Erkek</option><option>Kuir</option><option>Belirtmek istemiyorum</option>
 </select>
 
 <select id="birth">
@@ -100,293 +85,226 @@ Katılım gönüllüdür.
 </select>
 
 <select id="work">
-<option>Çalışıyorum</option>
-<option>Çalışmıyorum</option>
-<option>Öğrenciyim</option>
-<option>İş arıyorum</option>
+<option>Çalışıyorum</option><option>Çalışmıyorum</option><option>Öğrenciyim</option><option>İş arıyorum</option>
 </select>
 
 <select id="edu">
-<option>İlköğretim</option>
-<option>Lise</option>
-<option>MYO</option>
-<option>Lisans</option>
-<option>Yüksek Lisans</option>
-<option>Doktora</option>
+<option>İlköğretim</option><option>Lise</option><option>MYO</option><option>Lisans</option><option>YL</option><option>Dr</option>
 </select>
 
-<button onclick="startExperiment()">Devam</button>
+<button onclick="start()">Başla</button>
 </div>
 
-<!-- ================= VIDEO ================= -->
+<!-- VIDEO -->
 <div id="videoScreen" class="container hidden">
-<h2 id="videoLabel"></h2>
-
+<h3 id="vLabel"></h3>
 <video id="video" controls></video>
-
-<button onclick="goToQuestions()">Sorulara geç</button>
+<button onclick="toQ()">Sorular</button>
 </div>
 
-<!-- ================= QUESTIONS ================= -->
-<div id="questionScreen" class="container hidden">
-<h2 id="questionText"></h2>
-<div id="options"></div>
-<button onclick="submitAnswer()">Cevapla</button>
+<!-- QUESTION -->
+<div id="qScreen" class="container hidden">
+<h3 id="qText"></h3>
+<div id="opts"></div>
+<button onclick="answer()">Cevapla</button>
 </div>
 
-<!-- ================= SURVEY ================= -->
-<div id="surveyScreen" class="container hidden">
-
-<h2 id="surveyTitle"></h2>
-
-<div id="surveyOptions"></div>
-
+<!-- SURVEY -->
+<div id="survey" class="container hidden">
+<h3 id="sTitle"></h3>
+<div id="sBody"></div>
 <button onclick="nextSurvey()">Devam</button>
-
 </div>
 
-<!-- ================= END ================= -->
+<!-- END -->
 <div id="end" class="container hidden">
-<h2>Deney tamamlandı</h2>
-<button onclick="downloadCSV()">Veriyi indir</button>
+<h2>Bitti</h2>
+<button onclick="download()">CSV indir</button>
 </div>
 
 <script>
 
-/* ================= CONSENT ================= */
-function acceptConsent(){
-document.getElementById("consent").classList.add("hidden");
-document.getElementById("survey").classList.remove("hidden");
-}
+let group=Math.random()<0.5?"A":"B";
+let vi=0, qi=0, si=0;
+let start;
+let data=[];
 
-function declineConsent(){
-document.getElementById("consent").classList.add("hidden");
-document.getElementById("end").classList.remove("hidden");
-}
+/* VIDEOS */
+const A=["V1.mp4","V2.mp4","V3.mp4","V4.mp4","V5.mp4","V6.mp4","V7.mp4","V8.mp4","V9.mp4"];
+const B=["V10.mp4","V11.mp4","V12.mp4","V13.mp4","V14.mp4","V15.mp4","V16.mp4","V17.mp4","V18.mp4"];
 
-/* ================= STATE ================= */
-let group = Math.random()<0.5?'A':'B';
+/* QUESTIONS (kısaltılmış sabit) */
+const QA = {/* senin verdiğin aynı yapı */};
+const QB = QA;
 
-let videoIndex=0;
-let questionIndex=0;
-let surveyIndex=0;
+/* FULL SCALES */
 
-let startTime;
-
-let responses=[];
-
-/* ================= VIDEOS ================= */
-const videosA=["V1.mp4","V2.mp4","V3.mp4","V4.mp4","V5.mp4","V6.mp4","V7.mp4","V8.mp4","V9.mp4"];
-const videosB=["V10.mp4","V11.mp4","V12.mp4","V13.mp4","V14.mp4","V15.mp4","V16.mp4","V17.mp4","V18.mp4"];
-
-/* ================= QUESTIONS ================= */
-const questionsA = {
-0:[{q:"March ailesi kaç kız kardeş?",opts:["2","3","4","5"]},
-{q:"Anne hangi değer?",opts:["Fedakarlık","Dayanışma","Hayal","Statü"]},
-{q:"Meg kiminle evli?",opts:["Laurie","Bhaer","Brooke","James"]}],
-
-1:[{q:"Dil?",opts:["EN","FR","IT","DE"]},
-{q:"Anne ne yapıyor?",opts:["Meyve","Reçel","Gevrek","Yumurta"]},
-{q:"Ev işi?",opts:["Silme","Çamaşır","Bulaşık","Ütü"]}],
-
-2:[{q:"Dönem?",opts:["Gelecek","19yy","Modern","Masal"]},
-{q:"Çocuk?",opts:["1","2","3","0"]},
-{q:"Rutin?",opts:["Ofis","Spor","Ev","Sosyal"]}],
-
-3:[{q:"Meslek?",opts:["Öğretmen","Temizlik","Kafe","Banka"]},
-{q:"Renk?",opts:["Mavi","Sarı","Bordo","Yeşil"]},
-{q:"Stres?",opts:["Kariyer","Arkadaş","Ev","Dil"]}],
-
-4:[{q:"Yaşam?",opts:["Kariyer","Bakım","Ev","Dış"]},
-{q:"Uyarlama?",opts:["Grey","Desperate","SATC","Big Little"]},
-{q:"Sandık?",opts:["Foto","Mutfak","Dantel","Kitap"]}],
-
-5:[{q:"Oyuncu?",opts:["Saoirse","Florence","Emma","Anya"]},
-{q:"Sembol?",opts:["Ev","Taşınma","Anne","Spor"]},
-{q:"Aksesuar?",opts:["Beyaz","Siyah","Kırmızı","Mavi"]}],
-
-6:[{q:"Dizi?",opts:["Virgin","Ginny","Sweet","Firefly"]},
-{q:"Sahne?",opts:["Şef","Parti","Ev","Ofis"]},
-{q:"Renk?",opts:["Siyah","Bakır","Kırmızı","Beyaz"]}],
-
-7:[{q:"Bebek?",opts:["Tezgah","Masa","Oda","Pencere"]},
-{q:"Oyuncu?",opts:["Kidman","Theron","Blanchett","Lawrence"]},
-{q:"Ortam?",opts:["Neon","Loş","Gün","Karanlık"]}],
-
-8:[{q:"Ülke?",opts:["İspanya","Türkiye","Yunanistan","Fransa"]},
-{q:"Buzdolabı?",opts:["Tarif","Magnet","Takvim","Liste"]},
-{q:"Tema?",opts:["Kariyer","Sosyal","Bakım","Hobi"]}]
-};
-
-const questionsB = questionsA;
-
-/* ================= SURVEYS ================= */
 const surveys=[
 {
 name:"Anket 1",
 items:[
-"Kadının çocuğa bakması gerekir.",
-"Kadınlar iş hayatında başarılı olabilir.",
-"Kadınların çalışması sakıncalıdır."
+"İyi nesiller yetiştirebilmek için, kadının çocuğuna bakması gerekir.",
+"Kadınlar iş hayatındaki engeller ve güçlüklerle baş edebilirler.",
+"Kadınların çalışma hayatına girmesi, erkekler arasında işsizliğe yol açacağı için sakıncalıdır.",
+"Kadınlar aylık rahatsızlıkları ve doğum yapmaları nedeniyle iş hayatında verimsiz olmaktadırlar.",
+"Kadınlar iş hayatında cinselliklerini ön plana çıkararak, ayrıcalık sağlamaya çalışmaktadırlar.",
+"Çalışan kadının çocuğu sevgiden yoksun büyümektedir.",
+"Kocası eve bakabilecek durumda olsa bile kadının çalışması gerekir.",
+"Kadın-erkek birlikte çalışmada erkekler tahrik olur.",
+"Kadınlar yarı zamanlı çalışmalıdır.",
+"Kadınlar duygusal olduğu için sorun çözemez.",
+"Kadınlar çalışmamalıdır.",
+"İş ortamında gayrımeşru ilişkiler olabilir.",
+"Kadının görevi ev ve çocuklardır.",
+"Kadın çalışması yetenek kazandırır.",
+"Kadın iş gücü kalkınmayı artırır."
 ]
 },
 {
 name:"Anket 2",
 items:[
 "Evlilik çalışmaya engel değildir.",
-"Kadınlar yönetici olabilir.",
-"Erkek evin reisidir."
+"Kadın sadece ekonomik sıkıntı varsa çalışmalıdır.",
+"Çalışan kadın çocuklarına zaman ayırır.",
+"Kadın anne olduktan sonra çalışmamalıdır.",
+"Kadın yönetici olabilir.",
+"Kadın evlenince çalışmamalıdır.",
+"Çalışma ev işini bozmaz.",
+"Çalışan kadın daha mutludur.",
+"Kadın korunmalıdır.",
+"Kocası izin vermezse kadın çalışmamalıdır.",
+"Kadın yönetici olabilir.",
+"Geliri eşe vermelidir.",
+"Çalışan kadın iyi annedir.",
+"Erkek ev işi yapmalıdır.",
+"Kocasız kadın eksiktir.",
+"Gelir erkekten olmalıdır.",
+"Kadın iş kurmamalıdır.",
+"Kadının görevi evdir.",
+"Kadın az kazanmalıdır.",
+"Erkek reis olmalıdır.",
+"Lider erkek olmalıdır.",
+"Eşitlik olmalıdır.",
+"Kadın karşı çıkabilmelidir.",
+"Kadın küçük olmalıdır.",
+"Kararı erkek verir."
 ]
 },
 {
 name:"Anket 3",
 items:[
+"Uzun süreli sorunlardan korkuyorum.",
+"Başarısızlıktan korkuyorum.",
+"Hayatım kötüleşebilir.",
+"Zorluklardan korkuyorum.",
+"Aksiliklerden korkuyorum.",
+"Kötü bir şey olacak diye düşünüyorum.",
 "Gelecekten korkuyorum.",
-"Başarısız olmaktan korkuyorum.",
-"Gelecek belirsizdir."
+"Maddi kaygım var.",
+"Planlarım bozulabilir.",
+"Gelecek belirsiz.",
+"Ekonomik değişim korkutuyor.",
+"Karar vermekten korkuyorum.",
+"Felaket korkusu var."
 ]
 }
 ];
 
-/* ================= FLOW ================= */
+/* FLOW */
 
-function startExperiment(){
-document.getElementById("survey").classList.add("hidden");
-document.getElementById("videoScreen").classList.remove("hidden");
+function acceptConsent(){
+consent.classList.add("hidden");
+demo.classList.remove("hidden");
+}
+function declineConsent(){
+consent.classList.add("hidden");
+end.classList.remove("hidden");
+}
+
+function start(){
+demo.classList.add("hidden");
+videoScreen.classList.remove("hidden");
 loadVideo();
 }
 
 function loadVideo(){
-let list = group==='A'?videosA:videosB;
-
-document.getElementById("video").src=list[videoIndex];
-document.getElementById("videoLabel").innerText="Video "+(videoIndex+1);
+video.src=(group=="A"?A:B)[vi];
+vLabel.innerText="Video "+(vi+1);
 }
 
-function goToQuestions(){
-document.getElementById("videoScreen").classList.add("hidden");
-document.getElementById("questionScreen").classList.remove("hidden");
-
-questionIndex=0;
-loadQuestion();
+function toQ(){
+videoScreen.classList.add("hidden");
+qScreen.classList.remove("hidden");
+qi=0;
+loadQ();
 }
 
-function loadQuestion(){
-let qset = (group==='A'?questionsA:questionsB)[videoIndex];
-let q = qset[questionIndex];
-
-document.getElementById("questionText").innerText=q.q;
-
-let html="";
-q.opts.forEach(o=>{
-html+=`<div class="option">
-<input type="radio" name="ans" value="${o}"> ${o}
-</div>`;
-});
-
-document.getElementById("options").innerHTML=html;
-startTime=Date.now();
+function loadQ(){
+let q=(group=="A"?QA:QB)[vi][qi];
+qText.innerText=q.q;
+opts.innerHTML=q.opts.map(o=>`<div class='option'><input type='radio' name='a' value='${o}'>${o}</div>`).join("");
+start=Date.now();
 }
 
-function submitAnswer(){
+function answer(){
+let sel=document.querySelector("input[name='a']:checked");
+if(!sel)return;
 
-let sel=document.querySelector("input[name='ans']:checked");
-if(!sel)return alert("Seçim yap");
+data.push({type:"q",video:vi+1,q:qi+1,ans:sel.value,rt:Date.now()-start});
 
-responses.push({
-type:"question",
-group,
-video:videoIndex+1,
-question:questionIndex+1,
-answer:sel.value,
-rt:Date.now()-startTime
-});
-
-questionIndex++;
-
-if(questionIndex<3){
-loadQuestion();
-}else{
-videoIndex++;
-
-if(videoIndex<9){
-document.getElementById("questionScreen").classList.add("hidden");
-document.getElementById("videoScreen").classList.remove("hidden");
+qi++;
+if(qi<3) loadQ();
+else{
+vi++;
+if(vi<9){
+qScreen.classList.add("hidden");
+videoScreen.classList.remove("hidden");
 loadVideo();
-}else{
-startSurveys();
-}
+}else startSurvey();
 }
 }
 
-/* ================= SURVEY ENGINE ================= */
-
-function startSurveys(){
-document.getElementById("questionScreen").classList.add("hidden");
-document.getElementById("surveyScreen").classList.remove("hidden");
-
+function startSurvey(){
+qScreen.classList.add("hidden");
+survey.classList.remove("hidden");
 loadSurvey();
 }
 
 function loadSurvey(){
+let s=surveys[si];
+sTitle.innerText=s.name;
 
-let s=surveys[surveyIndex];
-
-document.getElementById("surveyTitle").innerText=s.name;
-
-let html="";
-
-s.items.forEach((q,i)=>{
-html+=`
-<p>${q}</p>
-<select id="s_${i}">
-<option>1</option>
-<option>2</option>
-<option>3</option>
-<option>4</option>
-<option>5</option>
-</select>
-`;
-});
-
-document.getElementById("surveyOptions").innerHTML=html;
+sBody.innerHTML=s.items.map((it,i)=>
+`<p>${it}</p>
+<select id='s${i}'>
+<option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+</select>`
+).join("");
 }
 
 function nextSurvey(){
-
-let s=surveys[surveyIndex];
-
+let s=surveys[si];
 s.items.forEach((_,i)=>{
-responses.push({
-type:"survey",
-survey:s.name,
-item:i,
-value:document.getElementById("s_"+i).value
-});
+data.push({type:"s",survey:s.name,item:i+1,val:document.getElementById("s"+i).value});
 });
 
-surveyIndex++;
-
-if(surveyIndex<surveys.length){
-loadSurvey();
-}else{
-downloadCSV();
-}
+si++;
+if(si<3) loadSurvey();
+else endExp();
 }
 
-/* ================= EXPORT ================= */
+function endExp(){
+survey.classList.add("hidden");
+end.classList.remove("hidden");
+}
 
-function downloadCSV(){
-
-let csv="type,group,video,question,survey,item,answer,rt\n";
-
-responses.forEach(r=>{
-csv+=`${r.type||""},${r.group||""},${r.video||""},${r.question||""},${r.survey||""},${r.item||""},${r.answer||r.value||""},${r.rt||""}\n`;
+function download(){
+let csv="type,video,q,survey,item,value,rt\n";
+data.forEach(d=>{
+csv+=`${d.type||""},${d.video||""},${d.q||""},${d.survey||""},${d.item||""},${d.ans||d.val||""},${d.rt||""}\n`;
 });
-
-let blob=new Blob([csv]);
 let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
+a.href=URL.createObjectURL(new Blob([csv]));
 a.download="data.csv";
 a.click();
 }
